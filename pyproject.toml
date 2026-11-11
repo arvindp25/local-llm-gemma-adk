@@ -1,0 +1,30 @@
+[project]
+name = "local-llm-gemma-adk"
+version = "0.1.0"
+description = "Local Google Gemma 4 E4B inference with Google ADK on Windows RTX 5050"
+readme = "README.md"
+requires-python = ">=3.11, <3.13"
+dependencies = [
+    "google-adk>=0.1.0",
+    "litellm>=1.84.0",
+    "ollama>=0.4.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.7.0",
+    "chromadb>=0.5.0",
+    "pynvml>=12.0.0",
+    "pyyaml>=6.0.0",
+    "rich>=13.0.0",
+    "httpx>=0.28.0",
+    "ddgs>=9.0.0",
+    "beautifulsoup4>=4.13.0",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

@@ -1,0 +1,25 @@
+# Local LLM Google Gemma & Google ADK Configuration
+# Tuned for NVIDIA RTX 5050 Laptop GPU (8GB VRAM) on Windows
+
+runtime:
+  ollama_api_base: "http://127.0.0.1:11434"
+  ollama_num_parallel: 1
+  ollama_flash_attention: true
+  ollama_kv_cache_type: "q8_0"
+
+models:
+  primary: "gemma4:e4b"
+  fallback: "gemma2:9b"
+  embedding: "nomic-embed-text"
+  provider_type: "adk_litellm"  # or "adk_ollama_native"
+
+context_safety:
+  num_ctx: 8192         # Advertised 128k context is capped to 8192 tokens for 8GB VRAM
+  max_tokens: 2048
+  temperature: 0.7
+  top_p: 0.9
+  vram_headroom_mb: 1000
+
+storage:
+  data_dir: ".data"
+  chroma_db_dir: ".data/chroma"
