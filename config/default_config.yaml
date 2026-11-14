@@ -22,4 +22,8 @@ context_safety:
 
 storage:
   data_dir: ".data"
+  vector_db_type: "qdrant"   # "qdrant" or "chroma"
+  qdrant_path: ".data/qdrant"
+  qdrant_url: null           # Set to e.g. "http://localhost:6333" if using remote Qdrant
+  qdrant_collection: "agent_persistent_knowledge"
   chroma_db_dir: ".data/chroma"

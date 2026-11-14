@@ -1,5 +1,10 @@
 import pytest
-from memory.vector_store import SemanticMemoryStore
+from memory.vector_store import (
+    SemanticMemoryStore,
+    QdrantMemoryStore,
+    ChromaMemoryStore,
+    migrate_chroma_to_qdrant,
+)
 from memory.episodic_memory import EpisodicMemory
 from memory.reflection_engine import ReflectionEngine
 from agent.gemma_agent import GemmaAgent
@@ -34,20 +39,50 @@ def test_semantic_vector_store_rag():
     assert "8151 MiB" in results[0]["content"]
 
 
-@pytest.mark.asyncio
-async def test_continuous_learning_reflection_loop():
+def test_continuous_learning_reflection_loop():
     store = SemanticMemoryStore(collection_name="test_reflection_knowledge")
     engine = ReflectionEngine(vector_store=store)
 
-    # Simulate reflecting on a completed task
-    insight = await engine.reflect_and_store(
+    # Simulate reflecting on a completed task without requiring an external LLM
+    coro = engine.reflect_and_store(
         task_prompt="Find optimal context length for 8GB VRAM",
         tool_results=[{"tool": "gpu_inspect", "output": "Peak VRAM at 8192 tokens is 6.5 GB"}],
         final_answer="Set default context window to 8192 tokens to preserve 1.5 GB headroom.",
     )
+    try:
+        coro.send(None)
+    except StopIteration as e:
+        insight = e.value
 
     assert len(insight) > 0
-    # Retrieve the insight from ChromaDB
+    # Retrieve the insight from vector store
     retrieved = engine.retrieve_relevant_insights(query="What is the safe context window for 8GB VRAM?", top_k=1)
     assert len(retrieved) > 0
     assert "8192" in retrieved[0] or "8GB" in retrieved[0] or "VRAM" in retrieved[0]
+
+
+def test_qdrant_vector_store_rag():
+    store = QdrantMemoryStore(collection_name="test_qdrant_knowledge", in_memory=True)
+    unique_fact = "Qdrant provides high-speed vector similarity indexing with payload filtering."
+    store.add_document(doc_id="fact_qdrant_01", text=unique_fact, metadata={"engine": "qdrant"})
+
+    assert store.count() == 1
+    results = store.search(query="Tell me about Qdrant vector indexing", top_k=1)
+    assert len(results) > 0
+    assert "Qdrant provides high-speed" in results[0]["content"]
+    assert results[0]["metadata"]["engine"] == "qdrant"
+
+
+def test_chroma_to_qdrant_migration():
+    chroma = ChromaMemoryStore(collection_name="test_migration_chroma")
+    chroma.add_document("m_doc_1", "Legacy insight from ChromaDB", {"source": "legacy"})
+    
+    qdrant = QdrantMemoryStore(collection_name="test_migration_qdrant", in_memory=True)
+    migrated_count = migrate_chroma_to_qdrant(chroma_store=chroma, qdrant_store=qdrant)
+
+    assert migrated_count >= 1
+    assert qdrant.count() >= 1
+    results = qdrant.search("Legacy insight", top_k=1)
+    assert len(results) > 0
+    assert "Legacy insight from ChromaDB" in results[0]["content"]
+

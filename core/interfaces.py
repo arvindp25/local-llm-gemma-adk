@@ -75,3 +75,23 @@ class BaseEmbeddingProvider(ABC):
     async def embed(self, texts: List[str]) -> List[List[float]]:
         """Embed a list of strings into vectors."""
         pass
+
+
+class BaseVectorStore(ABC):
+    """Abstract interface for local semantic vector databases."""
+
+    @abstractmethod
+    def add_document(self, doc_id: str, text: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+        """Stores a document or learned fact into vector memory."""
+        pass
+
+    @abstractmethod
+    def search(self, query: str, top_k: int = 3) -> List[Dict[str, Any]]:
+        """Performs semantic similarity search to retrieve relevant memories."""
+        pass
+
+    @abstractmethod
+    def count(self) -> int:
+        """Returns total document count in the collection."""
+        pass
+

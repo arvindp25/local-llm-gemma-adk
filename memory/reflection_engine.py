@@ -1,7 +1,7 @@
 import logging
 import uuid
 from typing import Any, Dict, List, Optional
-from core.interfaces import BaseLLMProvider
+from core.interfaces import BaseLLMProvider, BaseVectorStore
 from .vector_store import SemanticMemoryStore
 
 logger = logging.getLogger(__name__)
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class ReflectionEngine:
     """Continuous learning engine that distills completed workflows into persistent semantic memory."""
 
-    def __init__(self, vector_store: SemanticMemoryStore, llm_provider: Optional[BaseLLMProvider] = None):
+    def __init__(self, vector_store: BaseVectorStore, llm_provider: Optional[BaseLLMProvider] = None):
         self.vector_store = vector_store
         self.llm_provider = llm_provider
 

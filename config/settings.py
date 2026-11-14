@@ -37,14 +37,24 @@ class Settings(BaseSettings):
     ollama_kv_cache_type: str = Field(default="q8_0", description="Quantized KV cache (q8_0 saves ~40% VRAM)")
     vram_headroom_mb: int = Field(default=1000, description="Minimum free VRAM safeguard buffer in MiB")
 
-    # Storage Paths
+    # Storage Paths & Vector Database
+    vector_db_type: Literal["qdrant", "chroma"] = Field(
+        default="qdrant",
+        description="Vector database backend: qdrant or chroma",
+    )
     data_dir: Path = Field(default=BASE_DIR / ".data")
     chroma_db_dir: Path = Field(default=BASE_DIR / ".data" / "chroma")
+    qdrant_path: Path = Field(default=BASE_DIR / ".data" / "qdrant", description="Local directory for embedded Qdrant")
+    qdrant_url: Optional[str] = Field(default=None, description="Optional remote Qdrant URL (e.g. http://localhost:6333)")
+    qdrant_api_key: Optional[str] = Field(default=None, description="Optional Qdrant API key")
+    qdrant_collection_name: str = Field(default="agent_persistent_knowledge", description="Default Qdrant collection name")
     memory_db_path: Path = Field(default=BASE_DIR / ".data" / "episodic_memory.json")
 
     def ensure_directories(self) -> None:
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.chroma_db_dir.mkdir(parents=True, exist_ok=True)
+        if not self.qdrant_url:
+            self.qdrant_path.mkdir(parents=True, exist_ok=True)
 
 
 _settings: Optional[Settings] = None

@@ -1,6 +1,7 @@
 from .interfaces import (
     BaseLLMProvider,
     BaseEmbeddingProvider,
+    BaseVectorStore,
     ChatMessage,
     ToolCall,
     LLMResponse,
@@ -18,6 +19,7 @@ from .exceptions import (
 __all__ = [
     "BaseLLMProvider",
     "BaseEmbeddingProvider",
+    "BaseVectorStore",
     "ChatMessage",
     "ToolCall",
     "LLMResponse",
